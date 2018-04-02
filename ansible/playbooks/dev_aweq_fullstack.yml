@@ -1,0 +1,18 @@
+---
+# provision awe_queue server from ubuntu box
+#
+# what is this "fullstack" nonsense? when using images, it often makes
+# sense to provision a base box with dependencies that rarely change
+# to speed up the build process -- fullstack is the suffix used to let
+# devs know this includes everything, starting from the os image
+#
+# aweq_dev is meant to be a general hacking environment, thus there
+# are common tools included that may not ever be used in solutions
+
+- hosts: development
+  roles:
+    - common
+    - redis
+    - nodejs
+    - git
+    - jq

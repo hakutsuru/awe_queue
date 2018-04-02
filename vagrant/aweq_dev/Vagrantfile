@@ -1,0 +1,51 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = '2'
+
+# how much ram the virtual machine should have
+# export $AWEQ_MEMORY to override the default
+AWEQ_MEMORY = ENV['AWEQ_MEMORY'] ||= '1024'
+
+IP_ADDRESS = {
+  :aweq_dev => '192.168.251.88'
+}
+
+BOX_SOURCE = 'http://cloud-images.ubuntu.com/'
+BOX_TYPE = 'vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box'
+ANSIBLE_PLAYBOOK = '../../ansible/playbooks/dev_aweq_fullstack.yml'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.define :aweq_dev do |aweq|
+    aweq.vm.box = 'trusty'
+    aweq.vm.box_url = BOX_SOURCE + BOX_TYPE
+    aweq.vm.network "private_network", ip: IP_ADDRESS[:aweq_dev]
+    aweq.vm.hostname = "aweq-dev"
+
+    # use all available cpu cores
+    host = RbConfig::CONFIG['host_os']
+    if host =~ /darwin/
+      cpus = `sysctl -n hw.ncpu`.to_i
+    elsif host =~ /linux/
+      cpus = `nproc`.to_i
+    else
+      cpus = 1
+    end
+
+    aweq.vm.provider :virtualbox do |vb|
+      vb.customize ['modifyvm', :id, '--cpus', cpus]
+      vb.customize ['modifyvm', :id, '--memory', AWEQ_MEMORY]
+      vb.customize ['guestproperty', 'set', :id,
+                    '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 300000]
+    end
+
+    aweq.vm.synced_folder '../../backend/', '/opt/backend'
+    aweq.vm.synced_folder '../../frontend/', '/opt/frontend'
+
+    aweq.vm.provision 'ansible' do |ansible|
+      ansible.inventory_path = 'hosts'
+      ansible.playbook = ANSIBLE_PLAYBOOK
+      ansible.host_key_checking = false
+    end
+  end
+end

@@ -1,0 +1,18 @@
+{
+  "name": "awe-queue",
+  "version": "1.0.0",
+  "description": "simple queue inspired by AWS SQS",
+  "author": "Sean Broderick <hakutsuru@mac.com>",
+  "main": "app.js",
+  "private": true,
+  "scripts": {
+    "start": "DEBUG=express:* node app.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "ioredis": "^3.2.2",
+    "uuid": "^3.2.1"
+  }
+}
