@@ -171,7 +171,9 @@ Stats for the Queue...
 
 ### Consumer Polls AweQ for Messages, Batches Are Disjointed
 
-**Caveat: Batches are disjointed when no checked out messages have been restored to AweQ due to timing out. Thus, simple testing should be performed when no messages are checked out, and all messages consumed in less than the `checkoutLifetime` (of 120s).**
+This is the requirement that consumers checkout "messages which are not being processed". But this is only true when all consumers are able to acknowledge their messages in the time allowed (e.g. before a message checkout lifetime expires).
+
+**Batches are disjointed when no consumed messages have been restored to AweQ after timeout. Thus, simple testing should be done when no messages are checked out, and consume messages within the `checkoutLifetime` (of 120s).**
 
 Please add six more messages to AweQ via the `Send Message` form (recommended messages are "job-details-02", "job-details-03", etc).
 
@@ -270,7 +272,7 @@ Messages from the Queue...
 }
 ```
 
-Queue Status (from `Queue Status` page)...
+AweQ Status (from `Queue Status` page)...
 ```
 Stats for the Queue...
 {
@@ -357,7 +359,7 @@ Messages from the Queue...
 }
 ```
 
-*Details which may only be interesting to someone who falls upon the thorns of queueing theory... Messages are restored in order, to the end of AweQ, as though new messages, but with an updated `retry_count` to track issues. Due to ambiguity in queue specification, this was chosed as **simpler**.*
+*Details which may only be interesting to someone who falls upon the thorns of queueing theory... Messages are restored in order, to the end of AweQ, as though new messages, but with an updated `retry_count` to track issues. Due to ambiguity in queue specification, this was chosen as **simpler**.*
 
 ### Messages Acknowledged After Being Consumed Are Deleted
 
