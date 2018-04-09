@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h3>Queue Stats</h3>
+    <h3>Check AweQ Stats</h3>
     <p>Placeholder for pontification of get-stats...</p>
     <p>Could be nice to configure checkout-lifetime and rescue-interval via site, but then it would be much less YAGNI...
     <div class="form-group">

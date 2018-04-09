@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h3>Receive Messages from Queue</h3>
+    <h3>Checkout Messages from AweQ</h3>
     <p>Placeholder for quips on receive-message for future project polishing.</p>
     <p>If no batch size chosen, default is to checkout single message from queue.</p>
     <div class="form-group">

@@ -18,9 +18,9 @@ const routes = [
       {
         path: "/get-stats",
         component: getStats,
-        name: "Queue Status",
+        name: "Get-Stats",
         meta: {
-          description: "View Queue Stats"
+          description: "Check Queue Status"
         }
       },
       {

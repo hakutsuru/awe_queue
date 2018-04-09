@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <h3>Post Message to Queue</h3>
-    <p>Insightful notes on send-message belong here, but the clock is ticking.</p>
+    <h3>Post Message to AweQ</h3>
+    <p>Insightful notes on send-message belong here, but time&rsquo;s wing&eacute;d chariot is at our heels.</p>
     <div class="form-group">
         <label for="testing-content">Queue Message</label>
         <input type="text" class="form-control" v-model="queueMessage" placeholder="Your deepest thoughts are welcome..."/>

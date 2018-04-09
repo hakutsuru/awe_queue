@@ -1,16 +1,16 @@
 <template>
   <div class="container">
-    <h3>Remove Message from Queue</h3>
+    <h3>Acknowledge Handling of AweQ Message</h3>
     <p>Insightful notes are actually required to avoid confusion...</p>
     <p>tl;dr <strong>Do not use message-key returned by <em>send-message</em>, as it will not work.</strong> <em>delete-message</em> does not return an error if the key does not exist, since a message will be returned to the queue once its lifetime expires. Which is why queue consumers must track message keys to avoid duplicate processing.</p>
-    <p>You cannot remove a message unless you have first consumed it via <em>receive-message</em>. To enable <em>at-least-once</em> delivery, messages are put back on the queue unless <em>acknowledged</em>, and to be strange, that acknowledgement is our <em>delete-message</em> -- since this indicates to the queue that you have processed the message, and it need not be persisted.</p>
-    <p>Check <em>checkouts_count</em> before and after deleting a message -- and you should see its value decrease. The <em>checkouts</em> hash stores messages until acknowledged as processed (or the checkout expires). We remove messages via the <em>checkouts</em> hash.</p>
+    <p>You cannot remove a message unless you have first consumed it via <em>receive-message</em>. To enable <em>at-least-once</em> delivery, messages are put back on the queue unless <em>acknowledged</em>, and to be strange, that acknowledgement is our <em>delete-message</em> — since this indicates to the queue that you have processed the message, and it need not be persisted.</p>
+    <p>Check <em>checkouts_count</em> (of Queue Status) before and after deleting a message. You should see this value <em>decrease</em>. The <em>checkouts</em> hash stores messages until acknowledged as handled (or a checkout expires). We remove messages via the <em>checkouts</em> hash.</p>
     <div class="form-group">
         <label for="testing-content">Message Key</label>
         <input type="text" class="form-control" v-model="messageKey" placeholder="hoarye-here-goes-your-garbleyuuid..."/>
     </div>
     <div class="form-group">
-     <button @click="sendMessage" class="btn btn-primary">Send Message</button>
+     <button @click="sendMessage" class="btn btn-primary">Delete Message</button>
     </div>
     <div v-if="error" class="alert alert-danger">
       <p>{{ error }}</p>
