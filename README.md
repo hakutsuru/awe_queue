@@ -46,19 +46,6 @@ $ npm --version
 ```
 
 
-## Personal Statement
-
-Absolutely abysmal at *abstracting the logic around storage*...</br>
-
-(Here is where one should expect a self-satisfied note about sorted-set making orphan-message rescue more efficient.)
-
-For API design, basic SQS object commands were mapped to http endpoints.
-
-Comparison with SQS is provided below, but the essential design goal is *at-least-once* delivery of messages for processing. The rate of message production and consumption, with the required durability of messages, determine the complexity and cost of AweQ.
-
-Soundtrack for convoluted project review -- [The Decemberists <em>Everything Is Awful</em>](https://www.youtube.com/watch?v=3p8P0W7CUFo).
-
-
 ## Getting Started
 
 ### Queue Server
@@ -427,6 +414,19 @@ Stats for the Queue...
 If all your messages had unique text, you should be able to checkout all message in AweQ (via the `Receive Message` page), and not the deleted message is no longer available.
 
 For our case, the message "job-details-04" is no longer available.
+
+
+## Personal Statement
+
+Absolutely abysmal at *abstracting the logic around storage*...</br>
+
+(Here is where one should expect a self-satisfied note about sorted-set making orphan-message rescue more efficient.)
+
+For API design, basic SQS object commands were mapped to http endpoints.
+
+Comparison with SQS is provided below, but the essential design goal is *at-least-once* delivery of messages for processing. The rate of message production and consumption, with the required durability of messages, determine the complexity and cost of AweQ.
+
+Soundtrack for convoluted project review -- [The Decemberists <em>Everything Is Awful</em>](https://www.youtube.com/watch?v=3p8P0W7CUFo).
 
 
 ## Review Tasks
