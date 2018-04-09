@@ -140,7 +140,294 @@ $ curl -i -X GET http://localhost:3000/get-stats
 
 ## Testing Requirements
 
-[Describe using developer site views to demostrate that queue meets requirements.]
+**Manual Testing via Developer Tooling**
+
+Using our Quick and Dirty Developer Tool to validate requirements from the Design Guidelines...
+
+Each test builds upon previous test actions. The benefit of being a knowlege professional is that you can be dismissive of instructions, with the understanding that if you change a recipe, you should anticipate different results.
+
+For testing, you may note the Message IDs created, but this is not specified in testing, as it was deemed unhelpful. Paranoia can be a crucial survival skill, YMMV.
+
+**Starting Over: When testing, if ever confused, or desiring a _clean slate_ — drop into a new shell on the backend and _flush the database_...**
+```
+vagrant@aweq-dev:~$ redis-cli
+127.0.0.1:6379> flushdb
+OK
+127.0.0.1:6379> keys *
+(empty list or set)
+```
+
+### Producer Writes To AweQ, Obtains Message ID
+
+Type "job-details-01" into the `Queue Message` text field, and click the `Send Message` button.
+
+Note response information with `Message ID` added to page...
+```
+Message "21c37e00-3b81-11e8-8aba-b76f21b15267" posted to queue...
+```
+
+Each Message ID is a [Universally Unique Identifier (UUID)](https://en.wikipedia.org/wiki/Universally_unique_identifier).
+
+Visit `Queue Status` page, and click `Check Stats` button...
+```
+Stats for the Queue...
+{
+    "status": "okay",
+    "stats": {
+        "queue_length": 1,
+        "checkouts_count": 0,
+        "checkout_lifetime": "120s",
+        "rescue_interval": "2s"
+    }
+}
+```
+
+### Consumer Polls AweQ for Messages, Batches Are Disjointed
+
+**Caveat: Batches are disjointed when no checked out messages have been restored to AweQ due to timing out. Thus, simple testing should be performed when no messages are checked out, and all messages consumed in less than the `checkoutLifetime` (of 120s).**
+
+Please add six more messages to AweQ via the `Send Message` form (recommended messages are "job-details-02", "job-details-03", etc).
+
+Check AweQ status via `Queue Status` page...
+```
+Stats for the Queue...
+{
+    "status": "okay",
+    "stats": {
+        "queue_length": 7,
+        "checkouts_count": 0,
+        "checkout_lifetime": "120s",
+        "rescue_interval": "2s"
+    }
+}
+```
+
+Visit `Receive Message` page, enter "3" into the `Batch Size` text field...
+
+You will click the `Receive Message` button three times. The point here is to note all messages are consumed, and the batches do not have any common messages.
+
+Example Results...
+
+First Batch:
+```
+Messages from the Queue...
+{
+    "status": "okay",
+    "message": "Requested batch-size available.",
+    "messages": [
+        {
+            "key": "ab3e6df0-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229733455,
+            "retry_count": 0,
+            "message": "job-details-01"
+        },
+        {
+            "key": "acb46c20-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229735906,
+            "retry_count": 0,
+            "message": "job-details-02"
+        },
+        {
+            "key": "ae1079b0-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229738187,
+            "retry_count": 0,
+            "message": "job-details-03"
+        }
+    ]
+}
+```
+
+Second Batch:
+```
+Messages from the Queue...
+{
+    "status": "okay",
+    "message": "Requested batch-size available.",
+    "messages": [
+        {
+            "key": "af4fb070-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229740279,
+            "retry_count": 0,
+            "message": "job-details-04"
+        },
+        {
+            "key": "b09b9160-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229742454,
+            "retry_count": 0,
+            "message": "job-details-05"
+        },
+        {
+            "key": "b1b517b0-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229744299,
+            "retry_count": 0,
+            "message": "job-details-06"
+        }
+    ]
+}
+```
+
+Third Batch:
+```
+Messages from the Queue...
+{
+    "status": "okay",
+    "message": "Fewer messages available than requested.",
+    "messages": [
+        {
+            "key": "b2ac48f0-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229745919,
+            "retry_count": 0,
+            "message": "job-details-07"
+        }
+    ]
+}
+```
+
+Queue Status (from `Queue Status` page)...
+```
+Stats for the Queue...
+{
+    "status": "okay",
+    "stats": {
+        "queue_length": 0,
+        "checkouts_count": 7,
+        "checkout_lifetime": "120s",
+        "rescue_interval": "2s"
+    }
+}
+```
+
+### Consumed Messages Are Returned to AweQ When Not-Acknowledged
+
+Via `Request Messages` page, request messages until none more are available (note how you can adjust the `Batch Size` larger to rapidly checkout messages)...
+```
+Messages from the Queue...
+{
+    "status": "okay",
+    "message": "No messages available in queue.",
+    "messages": []
+}
+```
+
+Check AweQ status (via the `Queue Status` page), `checkout_count` should be non-zero...
+```
+Stats for the Queue...
+{
+    "status": "okay",
+    "stats": {
+        "queue_length": 7,
+        "checkouts_count": 0,
+        "checkout_lifetime": "120s",
+        "rescue_interval": "2s"
+    }
+}
+```
+
+*Wait longer than `checkout_lifetime`, shown as 120s in the AweQ configuration used for testing.*
+
+Reload AweQ status on the `Queue Status` page...
+```
+Stats for the Queue...
+{
+    "status": "okay",
+    "stats": {
+        "queue_length": 7,
+        "checkouts_count": 0,
+        "checkout_lifetime": "120s",
+        "rescue_interval": "2s"
+    }
+}
+```
+
+Note how checkouts have been returned to the queue.
+
+Checkout a three-message batch from AweQ (via `Receive Messages` page)...
+```
+Messages from the Queue...
+{
+    "status": "okay",
+    "message": "Requested batch-size available.",
+    "messages": [
+        {
+            "key": "ab3e6df0-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229733455,
+            "retry_count": 1,
+            "message": "job-details-01"
+        },
+        {
+            "key": "acb46c20-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229735906,
+            "retry_count": 1,
+            "message": "job-details-02"
+        },
+        {
+            "key": "ae1079b0-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229738187,
+            "retry_count": 1,
+            "message": "job-details-03"
+        }
+    ]
+}
+```
+
+*Details which may only be interesting to someone who falls upon the thorns of queueing theory... Messages are restored in order, to the end of AweQ, as though new messages, but with an updated `retry_count` to track issues. Due to ambiguity in queue specification, this was chosed as **simpler**.*
+
+### Messages Acknowledged After Being Consumed Are Deleted
+
+Confirm starting AweQ status...
+```
+Stats for the Queue...
+{
+    "status": "okay",
+    "stats": {
+        "queue_length": 7,
+        "checkouts_count": 0,
+        "checkout_lifetime": "120s",
+        "rescue_interval": "2s"
+    }
+}
+```
+
+Consume a single message via `Receive Message` page...
+```
+Messages from the Queue...
+{
+    "status": "okay",
+    "message": "Requested batch-size available.",
+    "messages": [
+        {
+            "key": "af4fb070-3b83-11e8-8aba-b76f21b15267",
+            "timestamp": 1523229740279,
+            "retry_count": 1,
+            "message": "job-details-04"
+        }
+    ]
+}
+```
+
+Acknowledge message processing via `Delete Message` page. Enter message key from batch into `Message Key` into field (e.g. "af4fb070-3b83-11e8-8aba-b76f21b15267"). Click `Delete Message` button...
+```
+Message "af4fb070-3b83-11e8-8aba-b76f21b15267" deleted...
+```
+
+Check AweQ status, and note how the sum of `queue_length` and `checkouts_count` is now one less than it was before the message was deleted...
+```
+Stats for the Queue...
+{
+    "status": "okay",
+    "stats": {
+        "queue_length": 6,
+        "checkouts_count": 0,
+        "checkout_lifetime": "120s",
+        "rescue_interval": "2s"
+    }
+}
+```
+
+If all your messages had unique text, you should be able to checkout all message in AweQ (via the `Receive Message` page), and not the deleted message is no longer available.
+
+For our case, the message "job-details-04" is no longer available.
+
 
 ## Review Tasks
 
